@@ -1,33 +1,19 @@
-/** Given a query string, return array of matching shows:
- *     { id, name, summary, episodesUrl }
- */
-
-
-/** Search Shows
- *    - given a search term, search for tv shows that
- *      match that query.  The function is async show it
- *       will be returning a promise.
- *
- *   - Returns an array of objects. Each object should include
- *     following show information:
- *    {
-        id: <show id>,
-        name: <show name>,
-        summary: <show summary>,
-        image: <an image from the show data, or a default imege if no image exists, (image isn't needed until later)>
-      }
- */
+//given a search term, returns an array of shows related to that term
 async function searchShows(query) {
+  //send a GET request for the show data, make the shows array, and select the response show array
   const res = await axios.get(`http://api.tvmaze.com/search/shows?q=${query}`);
   const shows = [];
   const tvShows = res.data;
 
   for (let theShow of tvShows) {
+    //loop over the response show array, pull out the data that we need, if there is no image for the show
+    //use a filler image
     let id = theShow.show.id;
     let name = theShow.show.name;
     let summary = theShow.show.summary;
     let image = theShow.show.image === null ? 'https://tinyurl.com/tv-missing' : theShow.show.image.original;
 
+    //put the data in an object and put the object in the shows array
     shows.push({
       id,
       name,
@@ -36,21 +22,21 @@ async function searchShows(query) {
     })
   }
 
+  //return the shows array
   return shows;
 }
 
 
 
 
-/** Populate shows list:
- *     - given list of shows, add shows to DOM
- */
-
+//given an array of shows, populate the page with those shows
 function populateShows(shows) {
+  //select the show list and empty out any shows that are on the page
   const $showsList = $("#shows-list");
   $showsList.empty();
 
   for (let show of shows) {
+    //loop over the array of shows, make a Bootstrap card for each show
     let $item = $(
       `<div class="col-md-6 col-lg-3 Show" data-show-id="${show.id}">
          <div class="card" data-show-id="${show.id}">
@@ -66,26 +52,27 @@ function populateShows(shows) {
        </div>
       `);
 
+    //append the Bootstrap card to the the show list  
     $showsList.append($item);
   }
 }
 
-
-/** Handle search form submission:
- *    - hide episodes area
- *    - get list of matching shows and show in shows list
- */
-
+//listen for a form submit in the search area
 $("#search-form").on("submit", async function handleSearch (evt) {
+  //prevent the page from refreshing upon submit
   evt.preventDefault();
 
+  //select the search value, if the search box is empty, do nothing
   let query = $("#search-query").val();
   if (!query) return;
 
+  //get rid of any episodes that were on the page
   $("#episodes-area").hide();
 
+  //request and then store our array of shows
   let shows = await searchShows(query);
 
+  //populate the page with these shows
   populateShows(shows);
 });
 
@@ -127,7 +114,7 @@ function populateEpisodes(episodes) {
   //Loop through the array of episodes. For each episode, create an LI.
   for (let episode of episodes) {
     let episodeLi = $(
-      `<li class="list-group-item">
+      `<li class="list-group-item list-group-item-primary">
           ${episode.name} (Season ${episode.season}, Episode ${episode.number})
       </li>`
     );
