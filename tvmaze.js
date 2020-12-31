@@ -58,6 +58,9 @@ function populateShows(shows) {
            <div class="card-body">
              <h5 class="card-title">${show.name}</h5>
              <p class="card-text">${show.summary}</p>
+             <button class="btn btn-outline-primary" id="episode-button">
+                Display Episodes
+             </button>
            </div>
          </div>
        </div>
@@ -112,3 +115,25 @@ async function getEpisodes(id) {
 
   return episodes;
 }
+
+function populateEpisodes(episodes) {
+  const $episodesList = $('#episodes-list');
+  for (let episode of episodes) {
+    let episodeLi = $(
+      `<li class="list-group-item">
+          ${episode.name} (Season ${episode.season}, Episode ${episode.number})
+      </li>`
+    );
+
+    episodeLi.appendTo($episodesList);
+  }
+}
+
+$('#shows-list').on('click', '#episode-button', async function() {
+  $("#episodes-list").empty();
+
+  let $showId = $(this).closest('.Show').data('show-id');
+  let episodes = await getEpisodes($showId);
+  populateEpisodes(episodes);
+  $('#episodes-area').show();
+})
