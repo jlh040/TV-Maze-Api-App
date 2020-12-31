@@ -90,14 +90,15 @@ $("#search-form").on("submit", async function handleSearch (evt) {
 });
 
 
-/** Given a show ID, return list of episodes:
- *      { id, name, season, number }
- */
+//Given an ID for a show, it returns an array of episodes for that show.
 
 async function getEpisodes(id) {
+  //Send a GET request for the episodes data and initialize our episodes array
   const res = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`)
   const episodes = [];
 
+  //Loop through the response episodes array and pull out the details that we want, then put them into
+  //in an object, and put them in an array
   const episodesArr = res.data;
   for (let episode of episodesArr) {
     let id = episode.id;
@@ -113,25 +114,38 @@ async function getEpisodes(id) {
     })
   }
 
+  //return the array
   return episodes;
 }
 
+// Given an array of episodes, populate the page with those episodes. (Into the episode list)
+
 function populateEpisodes(episodes) {
+  //Select the episode list
   const $episodesList = $('#episodes-list');
+
+  //Loop through the array of episodes. For each episode, create an LI.
   for (let episode of episodes) {
     let episodeLi = $(
       `<li class="list-group-item">
           ${episode.name} (Season ${episode.season}, Episode ${episode.number})
       </li>`
     );
-
+    
+    //Append this li to the episode list
     episodeLi.appendTo($episodesList);
   }
 }
 
+//Listen for clicks on the 'Display Episodes' button.
+
 $('#shows-list').on('click', '#episode-button', async function() {
+  //Empty the episodes list in case there are already episodes being displayed
   $("#episodes-list").empty();
 
+  /*Get the show ID, pass the show ID into getEpisodes to get the episodes corresponding to that show. 
+  Populate the page with those episodes, and then change the display value of the episodes list to reflect
+  this change*/
   let $showId = $(this).closest('.Show').data('show-id');
   let episodes = await getEpisodes($showId);
   populateEpisodes(episodes);
